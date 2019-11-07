@@ -1,0 +1,22 @@
+table{
+	background-color: black;
+	margin-left: auto;
+	margin-right: auto;
+}
+
+body{
+	background-color: darkred;
+	text-align: center;
+}
+p{
+	font-size: 60;
+}
+
+td{
+	background-color: silver;
+	width: 30;
+	height: 30;
+	text-align:center;
+	font-size: 22;
+	font-weight: 800;
+}
