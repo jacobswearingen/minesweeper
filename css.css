@@ -9,7 +9,7 @@ body{
 	text-align: center;
 }
 p{
-	font-size: 56;
+	font-size: 60;
 }
 
 td{
@@ -17,6 +17,6 @@ td{
 	width: 30;
 	height: 30;
 	text-align:center;
-	font-size: 22;
+	font-size: 20;
 	font-weight: 800;
 }
