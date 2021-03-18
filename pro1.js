@@ -1,62 +1,53 @@
-let bomb = "&#128163";
+let bombemoji = "&#128163";
 let flag = "&#128681";
 let smiley = "&#128578";
 let mindblown = "&#129327";
 let sunglasses = "&#128526";
+let bombval = 9;
+let nightuples = [[-1,-1],[-1,0],[-1,1],[0,-1],[0,1],[1,-1],[1,0],[1,1]];
+
 
 function buildTable(h,w,b) {
-    window.h = h;
-    window.w = w;
-    window.b = b;
+    let table = document.getElementById("table");
+    table.oncontextmenu = function() {return false };
     table.count = h*w;
-    let arrBombs = [];
+    table.h = h;
+    table.w = w;
+    table.b = b;
+    let bombNums = [];
     let randy = Math.floor(Math.random() * h*w);
-    while(arrBombs.length < b){
-        arrBombs.push(randy);
-        while(arrBombs.includes(randy)){
+    while(bombNums.length < b){
+        bombNums.push(randy);
+        while(bombNums.includes(randy)){
             randy = Math.floor(Math.random() * h*w);
         }
     }
-    table = document.getElementById("table");
-    table.oncontextmenu = function() {return false };
+
     for(let i = 0; i < h; i++){
         table.insertRow(i);
         for(let j = 0; j < w; j++){
             table.rows[i].insertCell(j);
             let td = table.rows[i].cells[j];
-            td.value = "";
             td.neighbors = [];
             td.opened = false;
+            td.value = (bombNums.includes(i*h+j))? bombval : "";
         }
     }
-
     for(let i = 0; i < h; i++){
         for(let j = 0; j < w; j++){
             let td = table.rows[i].cells[j];
-            if(arrBombs.includes(i*h+j)){
-                td.value = bomb;
-            }
-            for(let m = -1; m <= 1; m++){
-                if(((i+m) >=0) && ((i+m) < h)){
-                    for(let u = -1; u <= 1; u++){
-                        if(((j+u) >= 0) && ((j+u) < w)){
-                            let temptd = table.rows[i+m].cells[j+u];
-                            if(td.value == bomb){
-                                if(temptd.value != bomb)
-                                    temptd.value++;
-                            }
-                            else{
-                                td.neighbors.push(temptd);
-                            }
-                        }
-                    }
+            for(let k = 0; k < nightuples.length; k++){
+                if(((i+nightuples[k][0]) >= 0) && ((i+nightuples[k][0]) < h) && ((j+nightuples[k][1]) >=0) && ((j+nightuples[k][1]) < w)){
+                    let temptd = table.rows[i+nightuples[k][0]].cells[j+nightuples[k][1]];
+                    (td.value >= bombval)?temptd.value++:td.neighbors.push(temptd);
                 }
             }
         }
     }
     for(let i = 0; i < h; i++){
         for(let j = 0; j < w; j++){
-            findClick(table.rows[i].cells[j]); 
+            let td = table.rows[i].cells[j];
+            findClick(td); 
         }
     }
     document.getElementById("emoji").innerHTML = smiley;
@@ -69,64 +60,45 @@ function buildTable(h,w,b) {
 
 function findClick(td){
     if(td.value == ""){
-        td.onmousedown = function(){event.button == 0 ? blankClick(this) : flagClick(this); };
+        td.onmousedown = function(){event.button == 0 ? blankClick(this) : flagClick(this); wincheck();};
     }
-    else if(td.value > 0 && td.value <= 8){
-        td.onmousedown = function(){event.button == 0 ? numClick(this) : flagClick(this); };
+    else if(td.value > 0 && td.value < bombval){
+        td.onmousedown = function(){event.button == 0 ? numClick(this) : flagClick(this); wincheck(); };
     }
-    else if(td.value == bomb){
+    else if(td.value >= bombval){
         td.onmousedown = function(){event.button == 0 ? bombClick(this) : flagClick(this); };
     }
 }
 
 function blankClick(td){
     td.opened = true;
-    wincheck();
     td.style.backgroundColor = "lightgrey";
     td.onmousedown = null;
-    td.neighbors.forEach(reveal);
-}
-
-function reveal(te){
-    if (!te.opened)
-        te.onmousedown();
-}
-function wincheck(){
     table.count--;
-    if(table.count==window.b){
-        document.getElementById("emoji").innerHTML = sunglasses;
-        for(let i = 0; i < window.h; i++){
-            for(let j = 0; j < window.w; j++){
-                temptd = table.rows[i].cells[j];
-                temptd.opened = true;
-                temptd.onmousedown = null;
-                if(temptd.value == bomb){
-                    temptd.innerHTML = flag;
-                }
-            }
-        }
+    for(let i = 0; i < td.neighbors.length; i++){
+        if (!td.neighbors[i].opened)
+            td.neighbors[i].onmousedown();
     }
 }
 
 function numClick(td){
     td.opened = true;
-    wincheck();
-    td.innerHTML = td.value;
     td.style.backgroundColor = "lightgrey";
-    let color = ["blue", "green", "red", "darkBlue", "brown", "cyan", "black", "darkGray"];
-    if(!td.value.isNaN)
-        td.style.color = color[td.value-1];
     td.onmousedown = null;
+    table.count--;
+    td.innerHTML = td.value;
+    td.style.color = ["blue", "green", "red", "darkBlue", "brown", "cyan", "black", "darkGray"][td.value-1];
 }
+
 function bombClick(td){
     document.getElementById("emoji").innerHTML = mindblown;
-    for(let i = 0; i < window.h; i++){
-        for(let j = 0; j < window.w; j++){
+    for(let i = 0; i < table.h; i++){
+        for(let j = 0; j < table.w; j++){
             temptd = table.rows[i].cells[j];
             temptd.opened = true;
             temptd.onmousedown = null;
-            if((temptd.value == bomb) && (temptd.innerHTML != flag)){
-                temptd.innerHTML = temptd.value;
+            if((temptd.value >= bombval ) && (temptd.innerHTML != flag)){
+                temptd.innerHTML = bombemoji;
                 temptd.style.backgroundColor = "lightgrey";
             }
         }
@@ -137,7 +109,24 @@ function flagClick(td){
     td.innerHTML = flag;
     td.onmousedown =  function(){event.button == 0 ? null : unflagClick(td); };
 }
+
 function unflagClick(td){
     td.innerHTML = "";
     findClick(td);
+}
+
+function wincheck(){
+    if(table.count==table.b){
+        document.getElementById("emoji").innerHTML = sunglasses;
+        for(let i = 0; i < table.h; i++){
+            for(let j = 0; j < table.w; j++){
+                temptd = table.rows[i].cells[j];
+                temptd.opened = true;
+                temptd.onmousedown = null;
+                if(temptd.value >= bombval){
+                    temptd.innerHTML = flag;
+                }
+            }
+        }
+    }
 }
