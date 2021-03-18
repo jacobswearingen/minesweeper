@@ -1,18 +1,24 @@
 let bomb = "&#128163";
 let flag = "&#128681";
+let smiley = "&#128578";
+let mindblown = "&#129327";
+let sunglasses = "&#128526";
+
 function buildTable(h,w,b) {
     window.h = h;
     window.w = w;
-    let arrBombs = [];
-    for(let k = 0; k < b; k++){
+    window.b = b;
+    table.count = h*w;
+    var arrBombs = [];
+    while(arrBombs.length < 7){
         let randy = Math.floor(Math.random() * h*w);
         while(arrBombs.includes(randy)){
-            randy = Math.floor(Math.random() * h*w);
+            let randy = Math.floor(Math.random() * h*w);
         }
-        arrBombs[k] = randy;
+        arrBombs.push(randy);
     }
-
     table = document.getElementById("table");
+    table.oncontextmenu = function() {return false };
     for(let i = 0; i < h; i++){
         table.insertRow(i);
         for(let j = 0; j < w; j++){
@@ -20,6 +26,7 @@ function buildTable(h,w,b) {
             let td = table.rows[i].cells[j];
             td.value = "";
             td.neighbors = [];
+            td.opened = false;
         }
     }
 
@@ -27,6 +34,7 @@ function buildTable(h,w,b) {
         for(let j = 0; j < w; j++){
             let td = table.rows[i].cells[j];
             if(arrBombs.includes(i*h+j)){
+//TODO: Wrong number of Bombs put into grid
                 td.value = bomb;
             }
             for(let m = -1; m <= 1; m++){
@@ -36,7 +44,7 @@ function buildTable(h,w,b) {
                             let temptd = table.rows[i+m].cells[j+u];
                             if(td.value == bomb){
                                 if(temptd.value != bomb)
-                                   temptd.value++;
+                                    temptd.value++;
                             }
                             else{
                                 td.neighbors.push(temptd);
@@ -49,17 +57,17 @@ function buildTable(h,w,b) {
     }
     for(let i = 0; i < h; i++){
         for(let j = 0; j < w; j++){
-            table.rows[i].cells[j].oncontextmenu = function() {return false };
             findClick(table.rows[i].cells[j]); 
         }
     }
-    document.getElementById("emoji").innerHTML = "&#128578"; //smiley emoji
+    document.getElementById("emoji").innerHTML = smiley;
     document.getElementById("emoji").onmousedown = function(){
         for(let l = (h-1); l >= 0; l--){
             table.deleteRow(l);
         }
         buildTable(h,w,b)};
 }
+
 function findClick(td){
     if(td.value == ""){
         td.onmousedown = function(){event.button == 0 ? blankClick(this) : flagClick(this); };
@@ -71,17 +79,42 @@ function findClick(td){
         td.onmousedown = function(){event.button == 0 ? bombClick(this) : flagClick(this); };
     }
 }
+
 function blankClick(td){
-    td.innerHTML = td.value;
+    td.opened = true;
+    wincheck();
     td.style.backgroundColor = "lightgrey";
     td.onmousedown = null;
     td.neighbors.forEach(reveal);
 }
+
 function reveal(te){
-if (te.style.backgroundColor != "lightgrey")
-    te.onmousedown();
+    if (!te.opened)
+        te.onmousedown();
 }
+//TODO: implement this once right number of bombs are added
+function wincheck(){
+    table.count--;
+  /*  if(table.count==window.b){
+        document.getElementById("emoji").innerHTML = sunglasses;
+        for(let i = 0; i < window.h; i++){
+            for(let j = 0; j < window.w; j++){
+                temptd = table.rows[i].cells[j];
+                temptd.opened = true;
+                temptd.onmousedown = null;
+                if(temptd.value == bomb){
+                    temptd.innerHTML = flag;
+                }
+            }
+        }
+    }
+    */
+    
+}
+
 function numClick(td){
+    td.opened = true;
+    wincheck();
     td.innerHTML = td.value;
     td.style.backgroundColor = "lightgrey";
     let color = ["blue", "green", "red", "darkBlue", "brown", "cyan", "black", "darkGray"];
@@ -90,9 +123,11 @@ function numClick(td){
     td.onmousedown = null;
 }
 function bombClick(td){
+    document.getElementById("emoji").innerHTML = mindblown;
     for(let i = 0; i < window.h; i++){
         for(let j = 0; j < window.w; j++){
             temptd = table.rows[i].cells[j];
+            temptd.opened = true;
             temptd.onmousedown = null;
             if((temptd.value == bomb) && (temptd.innerHTML != flag)){
                 temptd.innerHTML = temptd.value;
