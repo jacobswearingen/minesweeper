@@ -9,13 +9,13 @@ function buildTable(h,w,b) {
     window.w = w;
     window.b = b;
     table.count = h*w;
-    var arrBombs = [];
-    while(arrBombs.length < 7){
-        let randy = Math.floor(Math.random() * h*w);
-        while(arrBombs.includes(randy)){
-            let randy = Math.floor(Math.random() * h*w);
-        }
+    let arrBombs = [];
+    let randy = Math.floor(Math.random() * h*w);
+    while(arrBombs.length < b){
         arrBombs.push(randy);
+        while(arrBombs.includes(randy)){
+            randy = Math.floor(Math.random() * h*w);
+        }
     }
     table = document.getElementById("table");
     table.oncontextmenu = function() {return false };
@@ -34,7 +34,6 @@ function buildTable(h,w,b) {
         for(let j = 0; j < w; j++){
             let td = table.rows[i].cells[j];
             if(arrBombs.includes(i*h+j)){
-//TODO: Wrong number of Bombs put into grid
                 td.value = bomb;
             }
             for(let m = -1; m <= 1; m++){
@@ -92,10 +91,9 @@ function reveal(te){
     if (!te.opened)
         te.onmousedown();
 }
-//TODO: implement this once right number of bombs are added
 function wincheck(){
     table.count--;
-  /*  if(table.count==window.b){
+    if(table.count==window.b){
         document.getElementById("emoji").innerHTML = sunglasses;
         for(let i = 0; i < window.h; i++){
             for(let j = 0; j < window.w; j++){
@@ -108,8 +106,6 @@ function wincheck(){
             }
         }
     }
-    */
-    
 }
 
 function numClick(td){
