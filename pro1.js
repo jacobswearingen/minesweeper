@@ -50,14 +50,18 @@ function buildTable(h,w,b) {
             findClick(td); 
         }
     }
-    document.getElementById("emoji").innerHTML = smiley;
-    document.getElementById("emoji").onmousedown = function(){
-        for(let l = (h-1); l >= 0; l--){
-            table.deleteRow(l);
-        }
-        buildTable(h,w,b)};
+    buildEmoji();
 }
 
+function buildEmoji(){
+    document.getElementById("emoji").innerHTML = smiley;
+    document.getElementById("emoji").onmousedown = function(){
+        for(let l = (table.h-1); l >= 0; l--){
+            table.deleteRow(l);
+        }
+        buildTable(table.h,table.w,table.b)};
+
+}
 function findClick(td){
     if(td.value == ""){
         td.onmousedown = function(){event.button == 0 ? blankClick(this) : flagClick(this); wincheck();};
